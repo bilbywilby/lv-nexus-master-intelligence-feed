@@ -59,7 +59,24 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       return bad(c, 'Invalid Workflow ID');
     }
     const workflow = new WorkflowEntity(c.env, id);
-    const res = await workflow.dryRun(id);
+    const res = await workflow.dryRun();
     return ok(c, res);
+  });
+  app.post('/api/automation/workflows/:id/schedule', async (c) => {
+    const id = c.req.param('id');
+    if (!isStr(id)) {
+      return bad(c, 'Invalid ID');
+    }
+    try {
+      const { scheduleIntervalMs, enabled } = await c.req.json<{ scheduleIntervalMs: number; enabled: boolean }>();
+      if (typeof scheduleIntervalMs !== 'number' || scheduleIntervalMs <= 0 || typeof enabled !== 'boolean') {
+        return bad(c, 'Invalid schedule payload');
+      }
+      const workflow = new WorkflowEntity(c.env, id);
+      await workflow.updateSchedule({ scheduleIntervalMs, enabled });
+      return ok(c, { success: true });
+    } catch (e) {
+      return bad(c, 'Failed to parse request body');
+    }
   });
 }

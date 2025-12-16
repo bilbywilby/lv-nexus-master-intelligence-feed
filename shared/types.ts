@@ -56,6 +56,9 @@ export interface WorkflowEntityState {
   id: string;
   workflow: N8nWorkflow;
   createdAt: number;
+  scheduleIntervalMs?: number;
+  enabled?: boolean;
+  lastRun?: number;
 }
 export interface AutomationRunResponse {
   results: FeedItem[];
