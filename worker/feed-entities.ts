@@ -102,4 +102,18 @@ export class FeedEntity extends IndexedEntity<FeedState> {
     await this.save(freshState);
     return freshState;
   }
+  async addAutomationEvents(items: FeedItem[]): Promise<void> {
+    await this.mutate(state => {
+      let newState = { ...state };
+      for (const item of items) {
+        newState.items.unshift(item);
+        newState = this.updateStats(newState, item);
+      }
+      if (newState.items.length > MAX_FEED_ITEMS) {
+        newState.items = newState.items.slice(0, MAX_FEED_ITEMS);
+      }
+      newState.items.sort((a, b) => b.timestamp - a.timestamp);
+      return newState;
+    });
+  }
 }

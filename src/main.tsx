@@ -16,6 +16,7 @@ import '@/App.css'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { IntelligenceIndexPage } from '@/pages/IntelligenceIndexPage';
 import { ConfigPage } from '@/pages/ConfigPage';
+import { AutomationCanvas } from '@/pages/AutomationCanvas';
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
   {
@@ -26,6 +27,11 @@ const router = createBrowserRouter([
   {
     path: "/index",
     element: <IntelligenceIndexPage />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/automation",
+    element: <AutomationCanvas />,
     errorElement: <RouteErrorBoundary />,
   },
   {

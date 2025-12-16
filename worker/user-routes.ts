@@ -1,7 +1,9 @@
 import { Hono } from "hono";
 import type { Env } from './core-utils';
 import { FeedEntity, FeedConfig } from "./feed-entities";
-import { ok, bad } from './core-utils';
+import { ok, bad, isStr } from './core-utils';
+import { WorkflowEntity } from "./automation-entities";
+import type { N8nWorkflow } from "@shared/types";
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   // LV-NEXUS FEED API
   app.get('/api/feed/live', async (c) => {
@@ -31,5 +33,33 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     } catch (e) {
       return bad(c, 'Failed to parse request body');
     }
+  });
+  // AUTOMATION INTEL API
+  app.post('/api/automation/workflows', async (c) => {
+    try {
+      const json = await c.req.json<N8nWorkflow>();
+      if (!json.nodes || !json.connections) {
+        return bad(c, 'Invalid workflow JSON');
+      }
+      const workflow = new WorkflowEntity(c.env, crypto.randomUUID());
+      const id = await workflow.importWorkflow(json);
+      return ok(c, { id });
+    } catch (e) {
+      return bad(c, 'Failed to parse request body');
+    }
+  });
+  app.get('/api/automation/workflows', async (c) => {
+    const { cursor, limit } = c.req.query();
+    const res = await WorkflowEntity.list(c.env, cursor || null, Number(limit) || 10);
+    return ok(c, res);
+  });
+  app.post('/api/automation/run/:id', async (c) => {
+    const id = c.req.param('id');
+    if (!isStr(id)) {
+      return bad(c, 'Invalid Workflow ID');
+    }
+    const workflow = new WorkflowEntity(c.env, id);
+    const res = await workflow.dryRun(id);
+    return ok(c, res);
   });
 }

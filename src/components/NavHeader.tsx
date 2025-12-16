@@ -44,6 +44,7 @@ export function NavHeader() {
           <nav className="hidden md:flex items-center gap-2">
             <NavLink to="/">Dashboard</NavLink>
             <NavLink to="/index">Index</NavLink>
+            <NavLink to="/automation">Automation</NavLink>
             <NavLink to="/config">Config</NavLink>
           </nav>
         </div>

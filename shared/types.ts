@@ -10,7 +10,7 @@ export interface GeoLocation {
 }
 export interface FeedItem {
   id: string;
-  type: string;
+  type: string | 'AUTOMATION';
   severity: Severity;
   title: string;
   location: string;
@@ -33,6 +33,33 @@ export interface FeedConfig {
 export interface LiveFeedResponse {
   items: FeedItem[];
   stats: FeedStats;
+}
+// Automation Intel Types
+export interface N8nNode {
+  id: string;
+  type: string;
+  name: string;
+  parameters: Record<string, any>;
+  position: [number, number];
+}
+export interface Connection {
+  node: string;
+  type?: string;
+  index?: number;
+}
+export interface N8nWorkflow {
+  name?: string;
+  nodes: N8nNode[];
+  connections: Record<string, { main: Connection[][] }>;
+}
+export interface WorkflowEntityState {
+  id: string;
+  workflow: N8nWorkflow;
+  createdAt: number;
+}
+export interface AutomationRunResponse {
+  results: FeedItem[];
+  summary: string;
 }
 // Minimal real-world chat example types (shared by frontend and worker)
 export interface User {
