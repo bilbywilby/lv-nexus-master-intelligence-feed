@@ -1,5 +1,5 @@
 # LV-Nexus: Master Intelligence Feed
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/bilbywilby/lv-nexus-master-intelligence-feed)
 ## 🌟 Project Overview
 **LV-Nexus** (`lv-nexus`) is a high-fidelity, real-time situational awareness dashboard designed for the Lehigh Valley region. It aggregates disparate intelligence streams—traffic incidents, emergency services dispatch, weather anomalies, and infrastructure status—into a unified, geo-spatial 'Single Pane of Glass'.
 The system utilizes Cloudflare Durable Objects for its primary deployment, maintaining a consistent, synchronized state of the 'region' and acting as a high-speed indexer. The frontend is a visually stunning, information-dense 'Mission Control' interface featuring a live scrolling intelligence feed, an interactive geo-spatial visualization, and real-time metric sparklines. An alternative standalone deployment using Fastify, Docker, and MongoDB is also supported for local development and private hosting.
