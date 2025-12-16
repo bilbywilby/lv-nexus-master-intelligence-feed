@@ -77,7 +77,10 @@ function updateWranglerJsonc() {
 }
 
 function runSetupCommands() {
-    const commands = [];
+    const commands = [
+    "bun install uuid",
+    "bun install @types/uuid"
+];
     
     if (commands.length === 0) {
         console.log('⊘ No setup commands to run');
