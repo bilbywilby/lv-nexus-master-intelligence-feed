@@ -1,8 +1,9 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { Search } from 'lucide-react';
+import { useState } from 'react';
 const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) => {
   const location = useLocation();
   const isActive = location.pathname === to;
@@ -10,17 +11,26 @@ const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) =>
     <Link
       to={to}
       className={cn(
-        "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+        "px-3 py-2 rounded-md text-sm font-medium transition-all relative",
         isActive
-          ? "bg-slate-700/50 text-amber-400"
+          ? "text-amber-400"
           : "text-slate-300 hover:bg-slate-800/60 hover:text-amber-300"
       )}
     >
       {children}
+      {isActive && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-[2px] bg-amber-400 rounded-full"></div>}
     </Link>
   );
 };
 export function NavHeader() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      navigate(`/index?q=${searchTerm}`);
+    }
+  };
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-slate-950/80 backdrop-blur-lg border-b border-slate-700/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
@@ -41,7 +51,10 @@ export function NavHeader() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
             <Input
-              placeholder="Universal Search..."
+              placeholder="Search Index..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={handleSearch}
               className="bg-slate-800/50 border-slate-700 pl-9 placeholder:text-slate-500 focus:ring-amber-500 focus:border-amber-500"
             />
           </div>

@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '@/lib/api-client';
 import type { LiveFeedResponse, FeedItem, Severity } from '@shared/types';
 import { NavHeader } from '@/components/NavHeader';
@@ -24,11 +25,15 @@ const SEVERITY_STYLES: Record<Severity, string> = {
 };
 const INCIDENT_TYPES = ['TRAFFIC', 'EMERGENCY', 'INFRASTRUCTURE', 'WEATHER'];
 export function IntelligenceIndexPage() {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchParams] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
   const [severityFilter, setSeverityFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [selectedItem, setSelectedItem] = useState<FeedItem | null>(null);
   const [isSheetOpen, setSheetOpen] = useState(false);
+  useEffect(() => {
+    setSearchTerm(searchParams.get('q') || '');
+  }, [searchParams]);
   const { data, error, isLoading, refetch } = useQuery<LiveFeedResponse>({
     queryKey: ['liveFeed'],
     queryFn: () => api('/api/feed/live'),
@@ -53,11 +58,11 @@ export function IntelligenceIndexPage() {
     if (isLoading) {
       return Array.from({ length: 10 }).map((_, i) => (
         <TableRow key={i}>
-          <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-          <TableCell><Skeleton className="h-6 w-20" /></TableCell>
-          <TableCell><Skeleton className="h-6 w-24" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-48" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-64" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-32 bg-slate-800" /></TableCell>
+          <TableCell><Skeleton className="h-6 w-20 bg-slate-800" /></TableCell>
+          <TableCell><Skeleton className="h-6 w-24 bg-slate-800" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-48 bg-slate-800" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-64 bg-slate-800" /></TableCell>
         </TableRow>
       ));
     }

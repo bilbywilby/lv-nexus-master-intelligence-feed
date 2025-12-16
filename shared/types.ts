@@ -26,6 +26,10 @@ export interface FeedStats {
   info: number;
   eventsLastHour: number[];
 }
+export interface FeedConfig {
+  frequency: number;
+  chaos: boolean;
+}
 export interface LiveFeedResponse {
   items: FeedItem[];
   stats: FeedStats;
