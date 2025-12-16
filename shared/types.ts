@@ -16,6 +16,8 @@ export interface FeedItem {
   location: string;
   coords: GeoLocation;
   timestamp: number;
+  summary?: string;
+  actions?: string[];
 }
 export interface FeedStats {
   total: number;

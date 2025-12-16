@@ -23,16 +23,16 @@ export class WorkflowEntity extends IndexedEntity<WorkflowEntityState> {
     enabled: false,
     lastRun: 0,
   };
-  static async list(env: Env, cursor?: string | null, limit?: number): Promise<{ items: WorkflowEntityState[]; next: string | null; }> {
-    const result = await super.list(env, cursor, limit);
+  static override async list(env: Env, cursor?: string | null, limit?: number): Promise<{ items: WorkflowEntityState[]; next: string | null; }> {
+    const result = await super.list(env, cursor, limit) as any;
     // Simulate cron for each workflow when listed
     for (const row of result.items) {
       const workflowInstance = new this(env, row.id);
       await workflowInstance.simCron();
     }
     // Re-fetch the list to get updated lastRun times
-    const updatedResult = await super.list(env, cursor, limit);
-    return updatedResult;
+    const updatedResult = await super.list(env, cursor, limit) as any;
+    return updatedResult as { items: WorkflowEntityState[]; next: string | null; };
   }
   async importWorkflow(workflow: N8nWorkflow): Promise<string> {
     const id = crypto.randomUUID();
@@ -95,13 +95,17 @@ export class WorkflowEntity extends IndexedEntity<WorkflowEntityState> {
       const pdfUrls = urls.filter((url: string) => url.endsWith('.pdf'));
       for (const url of pdfUrls) {
         const mockItem = generateMockFeedItem();
+        const title = mockItem.title.toLowerCase();
+        const summary = `AI Brief for Lehigh Valley ops: ${title}. Potential impact: medium.`;
         const feedItem: FeedItem = {
           ...mockItem,
           id: crypto.randomUUID(),
           type: 'AUTOMATION',
           severity: 'High',
-          title: `${scheduled ? 'SCHEDULED: ' : ''}Automation: New PDF Found`,
+          title: `${scheduled ? 'SCHEDULED: ' : ''}Automation PDF Intel: ${title}`,
           location: url,
+          summary,
+          actions: ['preview', 'download'],
           timestamp: Date.now(),
         };
         results.push(feedItem);

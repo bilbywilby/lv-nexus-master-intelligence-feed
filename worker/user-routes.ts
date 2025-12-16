@@ -79,4 +79,17 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       return bad(c, 'Failed to parse request body');
     }
   });
+  app.post('/api/automation/summarize/:url', async (c) => {
+    const urlParam = c.req.param('url');
+    if (typeof urlParam !== 'string' || !urlParam.endsWith('.pdf')) {
+      return bad(c, 'Invalid PDF URL');
+    }
+    const mockSummaries = [
+      'AI Brief: Critical traffic outage on Hamilton St impacting ops.',
+      'AI Brief: Infrastructure alert - power flicker in Bethlehem core.',
+      'AI Brief: Medical dispatch to 3rd St, Easton - ambulance en route.'
+    ];
+    const summary = mockSummaries[Math.floor(Math.random() * mockSummaries.length)];
+    return ok(c, { summary, actions: ['preview', 'download'] });
+  });
 }
