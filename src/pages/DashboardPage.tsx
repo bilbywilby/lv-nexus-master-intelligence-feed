@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AlertTriangle, BarChart2, Globe, ServerCrash, Rss } from 'lucide-react';
 import { api } from '@/lib/api-client';
@@ -13,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { NavHeader } from '@/components/NavHeader';
 import { FeedDrillDownSheet } from '@/components/dashboard/FeedDrillDownSheet';
 const StatCard = ({ title, value, icon, children }: { title: string; value: string | number; icon: React.ReactNode; children?: React.ReactNode }) => (
-  <Card className="bg-slate-900/50 border-slate-700/50 backdrop-blur-sm">
+  <Card className="bg-slate-900/50 border-slate-700/50 backdrop-blur-sm hover:shadow-glow hover:shadow-amber-500/20 hover:-translate-y-1 transition-all duration-200">
     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
       <CardTitle className="text-sm font-medium text-slate-300">{title}</CardTitle>
       <div className="text-slate-400">{icon}</div>
@@ -34,6 +35,7 @@ export function DashboardPage() {
   const [hoveredItem, setHoveredItem] = useState<FeedItem | null>(null);
   const [selectedItem, setSelectedItem] = useState<FeedItem | null>(null);
   const [isSheetOpen, setSheetOpen] = useState(false);
+  const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const { data, error, isLoading } = useQuery<LiveFeedResponse>({
     queryKey: ['liveFeed'],
@@ -41,6 +43,15 @@ export function DashboardPage() {
     refetchInterval: 2500,
     staleTime: 2000,
   });
+  const searchQuery = searchParams.get('q')?.toLowerCase() || '';
+  const filteredItems = useMemo(() => {
+    if (!data?.items) return [];
+    if (!searchQuery) return data.items;
+    return data.items.filter(item =>
+      item.title.toLowerCase().includes(searchQuery) ||
+      item.location.toLowerCase().includes(searchQuery)
+    );
+  }, [data?.items, searchQuery]);
   const handleReset = async () => {
     await api('/api/feed/reset', { method: 'POST' });
     queryClient.invalidateQueries({ queryKey: ['liveFeed'] });
@@ -64,7 +75,6 @@ export function DashboardPage() {
       );
     }
     const stats = data?.stats;
-    const feedItems = data?.items ?? [];
     return (
       <>
         <header className="flex justify-between items-center mb-6">
@@ -80,22 +90,22 @@ export function DashboardPage() {
           className="grid grid-cols-12 grid-rows-[auto] gap-4 md:gap-6 h-auto min-h-[70vh]"
         >
           <motion.div layout className="col-span-12 lg:col-span-8 row-span-1 lg:row-span-2">
-            <Card className="h-full bg-slate-900/50 border-slate-700/50 backdrop-blur-sm flex flex-col">
+            <Card className="h-full bg-slate-950/60 border-slate-700/50 backdrop-blur-sm flex flex-col">
               <CardHeader>
                 <CardTitle className="text-emerald-400 flex items-center gap-2"><Globe size={18} /> GEO-SPATIAL VIEW</CardTitle>
               </CardHeader>
               <CardContent className="flex-grow p-0 relative">
-                <NexusMap items={feedItems} selectedItem={hoveredItem} onSelectItem={setHoveredItem} onClickItem={handleItemClick} />
+                <NexusMap items={filteredItems} selectedItem={hoveredItem} onSelectItem={setHoveredItem} onClickItem={handleItemClick} />
               </CardContent>
             </Card>
           </motion.div>
           <motion.div layout className="col-span-12 lg:col-span-4 row-span-1 lg:row-span-2">
-            <Card className="h-full bg-slate-900/50 border-slate-700/50 backdrop-blur-sm flex flex-col">
+            <Card className="h-full bg-slate-950/60 border-slate-700/50 backdrop-blur-sm flex flex-col">
               <CardHeader>
                 <CardTitle className="text-emerald-400 flex items-center gap-2"><Rss size={18} /> LIVE FEED</CardTitle>
               </CardHeader>
               <CardContent className="flex-grow overflow-hidden">
-                <FeedTicker items={feedItems} onSelectItem={setHoveredItem} onClickItem={handleItemClick} />
+                <FeedTicker items={filteredItems} onSelectItem={setHoveredItem} onClickItem={handleItemClick} />
               </CardContent>
             </Card>
           </motion.div>
@@ -106,7 +116,7 @@ export function DashboardPage() {
             <StatCard title="TOTAL EVENTS" value={stats?.total ?? 0} icon={<BarChart2 className="h-4 w-4" />} />
           </motion.div>
           <motion.div layout className="col-span-12 md:col-span-6 lg:col-span-4">
-            <Card className="bg-slate-900/50 border-slate-700/50 backdrop-blur-sm h-full">
+            <Card className="bg-slate-950/60 border-slate-700/50 backdrop-blur-sm h-full">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-slate-300">EVENT VELOCITY (LAST HOUR)</CardTitle>
               </CardHeader>

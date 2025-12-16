@@ -23,17 +23,6 @@ export class WorkflowEntity extends IndexedEntity<WorkflowEntityState> {
     enabled: false,
     lastRun: 0,
   };
-  static override async list(env: Env, cursor?: string | null, limit?: number): Promise<{ items: WorkflowEntityState[]; next: string | null; }> {
-    const result = await super.list(env, cursor, limit) as any;
-    // Simulate cron for each workflow when listed
-    for (const row of result.items) {
-      const workflowInstance = new this(env, row.id);
-      await workflowInstance.simCron();
-    }
-    // Re-fetch the list to get updated lastRun times
-    const updatedResult = await super.list(env, cursor, limit) as any;
-    return updatedResult as { items: WorkflowEntityState[]; next: string | null; };
-  }
   async importWorkflow(workflow: N8nWorkflow): Promise<string> {
     const id = crypto.randomUUID();
     const state: WorkflowEntityState = {
@@ -126,5 +115,11 @@ export class WorkflowEntity extends IndexedEntity<WorkflowEntityState> {
         summary: `Dry run failed: ${message}`,
       };
     }
+  }
+}
+export async function simAllCrons(env: Env, workflows: WorkflowEntityState[]): Promise<void> {
+  for (const wf of workflows) {
+    const instance = new WorkflowEntity(env, wf.id);
+    await instance.simCron();
   }
 }

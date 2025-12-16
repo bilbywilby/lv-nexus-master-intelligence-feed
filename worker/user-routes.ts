@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import type { Env } from './core-utils';
 import { FeedEntity, FeedConfig } from "./feed-entities";
 import { ok, bad, isStr } from './core-utils';
-import { WorkflowEntity } from "./automation-entities";
+import { WorkflowEntity, simAllCrons } from "./automation-entities";
 import type { N8nWorkflow } from "@shared/types";
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   // LV-NEXUS FEED API
@@ -51,7 +51,10 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/automation/workflows', async (c) => {
     const { cursor, limit } = c.req.query();
     const res = await WorkflowEntity.list(c.env, cursor || null, Number(limit) || 10);
-    return ok(c, res);
+    await simAllCrons(c.env, res.items);
+    // Re-fetch to get updated lastRun times after simulation
+    const updatedRes = await WorkflowEntity.list(c.env, cursor || null, Number(limit) || 10);
+    return ok(c, updatedRes);
   });
   app.post('/api/automation/run/:id', async (c) => {
     const id = c.req.param('id');
@@ -69,7 +72,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     }
     try {
       const { scheduleIntervalMs, enabled } = await c.req.json<{ scheduleIntervalMs: number; enabled: boolean }>();
-      if (typeof scheduleIntervalMs !== 'number' || scheduleIntervalMs <= 0 || typeof enabled !== 'boolean') {
+      if (typeof scheduleIntervalMs !== 'number' || scheduleIntervalMs < 0 || typeof enabled !== 'boolean') {
         return bad(c, 'Invalid schedule payload');
       }
       const workflow = new WorkflowEntity(c.env, id);

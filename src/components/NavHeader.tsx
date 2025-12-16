@@ -3,7 +3,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { Search } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) => {
   const location = useLocation();
   const isActive = location.pathname === to;
@@ -18,17 +18,46 @@ const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) =>
       )}
     >
       {children}
-      {isActive && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-[2px] bg-amber-400 rounded-full"></div>}
+      {isActive && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-[2px] bg-amber-400 rounded-full shadow-glow shadow-amber-500/50"></div>}
     </Link>
   );
 };
 export function NavHeader() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
-  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    setSearchTerm(searchParams.get('q') || '');
+  }, [searchParams]);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newSearchTerm = e.target.value;
+    setSearchTerm(newSearchTerm);
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+    debounceTimeout.current = setTimeout(() => {
+      if (location.pathname !== '/index') {
+        navigate(`/index?q=${newSearchTerm}`);
+      } else {
+        setSearchParams(params => {
+          if (newSearchTerm) {
+            params.set('q', newSearchTerm);
+          } else {
+            params.delete('q');
+          }
+          return params;
+        });
+      }
+    }, 300);
+  };
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      navigate(`/index?q=${searchTerm}`);
+      if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+      if (location.pathname !== '/index') {
+        navigate(`/index?q=${searchTerm}`);
+      }
     }
   };
   return (
@@ -54,9 +83,9 @@ export function NavHeader() {
             <Input
               placeholder="Search Index..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={handleSearch}
-              className="bg-slate-800/50 border-slate-700 pl-9 placeholder:text-slate-500 focus:ring-amber-500 focus:border-amber-500"
+              onChange={handleSearchChange}
+              onKeyDown={handleKeyDown}
+              className="bg-slate-800/50 border-slate-700 pl-9 placeholder:text-slate-500 focus-visible:ring-2 focus-visible:ring-amber-500/50 focus-visible:ring-offset-0 focus-visible:border-amber-500/50 transition-shadow duration-300 focus:shadow-glow focus:shadow-amber-500/30"
             />
           </div>
         </div>
