@@ -1,6 +1,7 @@
 import { IndexedEntity } from "./core-utils";
 import type { FeedItem, FeedStats } from "@shared/types";
 import { generateMockFeedItem } from "../src/lib/mock-data-generator";
+import type { Env } from './core-utils';
 const MAX_FEED_ITEMS = 50;
 export type FeedState = {
   id: string; // Should be a singleton, e.g., "live"

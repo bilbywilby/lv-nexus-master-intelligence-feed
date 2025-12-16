@@ -1,6 +1,5 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useSearchParams } from 'react-router-dom';
 import { api } from '@/lib/api-client';
 import type { LiveFeedResponse, FeedItem, Severity } from '@shared/types';
 import { NavHeader } from '@/components/NavHeader';
@@ -23,17 +22,13 @@ const SEVERITY_STYLES: Record<Severity, string> = {
   Low: "bg-yellow-500/20 text-yellow-300 border-yellow-500/50",
   Info: "bg-sky-500/20 text-sky-300 border-sky-500/50",
 };
-const INCIDENT_TYPES = ['TRAFFIC', 'EMERGENCY', 'INFRASTRUCTURE', 'WEATHER', 'AUTOMATION'];
+const INCIDENT_TYPES = ['TRAFFIC', 'EMERGENCY', 'INFRASTRUCTURE', 'WEATHER'];
 export function IntelligenceIndexPage() {
-  const [searchParams] = useSearchParams();
-  const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
+  const [searchTerm, setSearchTerm] = useState('');
   const [severityFilter, setSeverityFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [selectedItem, setSelectedItem] = useState<FeedItem | null>(null);
   const [isSheetOpen, setSheetOpen] = useState(false);
-  useEffect(() => {
-    setSearchTerm(searchParams.get('q') || '');
-  }, [searchParams]);
   const { data, error, isLoading, refetch } = useQuery<LiveFeedResponse>({
     queryKey: ['liveFeed'],
     queryFn: () => api('/api/feed/live'),
@@ -58,19 +53,18 @@ export function IntelligenceIndexPage() {
     if (isLoading) {
       return Array.from({ length: 10 }).map((_, i) => (
         <TableRow key={i}>
-          <TableCell><Skeleton className="h-4 w-32 bg-slate-800" /></TableCell>
-          <TableCell><Skeleton className="h-6 w-20 bg-slate-800" /></TableCell>
-          <TableCell><Skeleton className="h-6 w-24 bg-slate-800" /></TableCell>
-          <TableCell><Skeleton className="h-6 w-12 bg-slate-800" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-48 bg-slate-800" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-64 bg-slate-800" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+          <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+          <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+          <TableCell><Skeleton className="h-4 w-64" /></TableCell>
         </TableRow>
       ));
     }
     if (error) {
       return (
         <TableRow>
-          <TableCell colSpan={6} className="h-24 text-center text-red-400">
+          <TableCell colSpan={5} className="h-24 text-center text-red-400">
             <div className="flex items-center justify-center gap-2">
               <ServerCrash className="h-5 w-5" />
               <span>Failed to load intelligence data.</span>
@@ -88,7 +82,6 @@ export function IntelligenceIndexPage() {
         <TableCell className="font-mono text-xs text-slate-400">{format(new Date(item.timestamp), 'HH:mm:ss.SSS')}</TableCell>
         <TableCell><Badge variant="outline" className={cn(SEVERITY_STYLES[item.severity])}>{item.severity}</Badge></TableCell>
         <TableCell><Badge variant="secondary">{item.type}</Badge></TableCell>
-        <TableCell>{item.summary ? <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/50 text-xs">AI</Badge> : '-'}</TableCell>
         <TableCell className="font-medium text-slate-200">{item.title}</TableCell>
         <TableCell className="text-slate-300">{item.location}</TableCell>
       </TableRow>
@@ -146,7 +139,6 @@ export function IntelligenceIndexPage() {
                     <TableHead className="w-[120px]">Time</TableHead>
                     <TableHead>Severity</TableHead>
                     <TableHead>Type</TableHead>
-                    <TableHead>AI</TableHead>
                     <TableHead>Title</TableHead>
                     <TableHead>Location</TableHead>
                   </TableRow>

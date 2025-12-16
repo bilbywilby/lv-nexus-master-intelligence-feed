@@ -24,7 +24,7 @@ const SEVERITY_COLORS: Record<string, string> = {
   Low: 'bg-yellow-500',
   Info: 'bg-sky-500',
 };
-export function NexusMap({ items, selectedItem, onSelectItem }: { items: FeedItem[], selectedItem: FeedItem | null, onSelectItem: (item: FeedItem | null) => void }) {
+export function NexusMap({ items, selectedItem, onSelectItem, onClickItem }: { items: FeedItem[], selectedItem: FeedItem | null, onSelectItem: (item: FeedItem | null) => void, onClickItem: (item: FeedItem) => void }) {
   return (
     <div className="w-full h-full bg-slate-800/20 relative overflow-hidden border-t border-slate-700/50">
       <svg width="100%" height="100%" className="absolute inset-0">
@@ -57,6 +57,7 @@ export function NexusMap({ items, selectedItem, onSelectItem }: { items: FeedIte
               className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer"
               onMouseEnter={() => onSelectItem(item)}
               onMouseLeave={() => onSelectItem(null)}
+              onClick={() => onClickItem(item)}
             >
               <div className={cn(
                 "w-3 h-3 rounded-full transition-all duration-200",
@@ -64,7 +65,7 @@ export function NexusMap({ items, selectedItem, onSelectItem }: { items: FeedIte
                 isSelected ? 'ring-2 ring-offset-2 ring-offset-slate-900 ring-white' : 'ring-1 ring-black/50'
               )}>
                 <div className={cn(
-                  "absolute inset-0 rounded-full animate-ping",
+                  "absolute inset-0 rounded-full",
                   SEVERITY_COLORS[item.severity],
                   item.severity === 'Critical' ? 'animate-ping' : 'opacity-50'
                 )}></div>
@@ -77,7 +78,7 @@ export function NexusMap({ items, selectedItem, onSelectItem }: { items: FeedIte
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="absolute bottom-4 left-4 bg-slate-900/80 backdrop-blur-md p-3 rounded-md border border-slate-700 text-sm shadow-lg"
+          className="absolute bottom-4 left-4 bg-slate-900/80 backdrop-blur-md p-3 rounded-md border border-slate-700 text-sm shadow-lg pointer-events-none"
         >
           <p className="font-bold text-amber-400">{selectedItem.title}</p>
           <p className="text-slate-300">{selectedItem.location}</p>

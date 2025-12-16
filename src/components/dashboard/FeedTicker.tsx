@@ -10,7 +10,7 @@ const SEVERITY_STYLES: Record<Severity, string> = {
   Low: 'border-yellow-500/50 text-yellow-300',
   Info: 'border-sky-500/50 text-sky-300',
 };
-export function FeedTicker({ items, onSelectItem }: { items: FeedItem[], onSelectItem: (item: FeedItem) => void }) {
+export function FeedTicker({ items, onSelectItem, onClickItem }: { items: FeedItem[], onSelectItem: (item: FeedItem) => void, onClickItem: (item: FeedItem) => void }) {
   return (
     <ScrollArea className="h-full">
       <div className="pr-4">
@@ -28,6 +28,7 @@ export function FeedTicker({ items, onSelectItem }: { items: FeedItem[], onSelec
                 SEVERITY_STYLES[item.severity]
               )}
               onMouseEnter={() => onSelectItem(item)}
+              onClick={() => onClickItem(item)}
             >
               <div className="flex justify-between items-start">
                 <p className="text-sm font-semibold flex-grow">{item.title}</p>
