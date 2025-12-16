@@ -1,8 +1,40 @@
 import { IndexedEntity } from "./core-utils";
 import type { N8nWorkflow, WorkflowEntityState, FeedItem, AutomationRunResponse } from "@shared/types";
-import { parseStringPromise } from 'xml2js';
+
 import { FeedEntity } from "./feed-entities";
 import { generateMockFeedItem } from "../src/lib/mock-data-generator";
+
+/**
+ * Minimal mock XML parser for the static sitemap used in dryRun().
+ * It extracts every <loc>…</loc> value and returns an object that
+ * matches the shape produced by `xml2js`'s `parseStringPromise`.
+ *
+ * Example return shape:
+ * {
+ *   urlset: {
+ *     url: [
+ *       { loc: ['https://example.com/page1'] },
+ *       { loc: ['https://example.com/docs/whitepaper.pdf'] },
+ *       ...
+ *     ]
+ *   }
+ * }
+ *
+ * The implementation uses a simple RegExp, runs in <1 ms for the
+ * provided mock XML, and does not rely on any Node or DOM APIs.
+ */
+function parseMockSitemap(xml: string) {
+  const locRegex = /<loc>(.*?)<\/loc>/gi;
+  const urls: Array<{ loc: [string] }> = [];
+  let match: RegExpExecArray | null;
+
+  while ((match = locRegex.exec(xml)) !== null) {
+    // match[1] contains the text between <loc> and </loc>
+    urls.push({ loc: [match[1]] });
+  }
+
+  return { urlset: { url: urls } };
+}
 export class WorkflowEntity extends IndexedEntity<WorkflowEntityState> {
   static readonly entityName = "workflow";
   static readonly indexName = "workflows";
@@ -50,7 +82,7 @@ export class WorkflowEntity extends IndexedEntity<WorkflowEntityState> {
       const xmlNodeId = connections[httpNode.id]?.main[0][0]?.node;
       const xmlNode = nodeMap.get(xmlNodeId);
       if (!xmlNode || xmlNode.type !== 'n8n-nodes-base.xml') throw new Error("XML node not found after HTTP Request");
-      const parsedXml = await parseStringPromise(mockSitemapXml);
+      const parsedXml = parseMockSitemap(mockSitemapXml);
       const urls = parsedXml.urlset.url.map((u: any) => u.loc[0]);
       // 4. Simulate Filter
       const filterNodeId = connections[xmlNode.id]?.main[0][0]?.node;
