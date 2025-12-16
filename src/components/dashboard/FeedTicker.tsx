@@ -3,7 +3,6 @@ import { formatDistanceToNow } from 'date-fns';
 import type { FeedItem, Severity } from '@shared/types';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
 const SEVERITY_STYLES: Record<Severity, string> = {
   Critical: 'border-red-500/50 text-red-300',
   High: 'border-orange-500/50 text-orange-300',
@@ -11,7 +10,7 @@ const SEVERITY_STYLES: Record<Severity, string> = {
   Low: 'border-yellow-500/50 text-yellow-300',
   Info: 'border-sky-500/50 text-sky-300',
 };
-export function FeedTicker({ items, onSelectItem, onClickItem }: { items: FeedItem[], onSelectItem: (item: FeedItem) => void, onClickItem: (item: FeedItem) => void }) {
+export function FeedTicker({ items, onSelectItem }: { items: FeedItem[], onSelectItem: (item: FeedItem) => void }) {
   return (
     <ScrollArea className="h-full">
       <div className="pr-4">
@@ -29,15 +28,9 @@ export function FeedTicker({ items, onSelectItem, onClickItem }: { items: FeedIt
                 SEVERITY_STYLES[item.severity]
               )}
               onMouseEnter={() => onSelectItem(item)}
-              onClick={() => onClickItem(item)}
             >
               <div className="flex justify-between items-start">
-                <p className="text-sm font-semibold flex-grow flex items-center">
-                  <span>{item.title}</span>
-                  {item.summary && (
-                    <Badge className="ml-2 bg-amber-500/30 text-amber-300 text-xs border-amber-500/50">AI</Badge>
-                  )}
-                </p>
+                <p className="text-sm font-semibold flex-grow">{item.title}</p>
                 <p className="text-xs text-slate-400 flex-shrink-0 ml-2">
                   {formatDistanceToNow(new Date(item.timestamp), { addSuffix: true })}
                 </p>
