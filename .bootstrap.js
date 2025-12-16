@@ -79,7 +79,10 @@ function updateWranglerJsonc() {
 function runSetupCommands() {
     const commands = [
     "bun install uuid",
-    "bun install @types/uuid"
+    "bun install @types/uuid",
+    "bun install @xyflow/react",
+    "bun install xml2js",
+    "bun install @types/xml2js"
 ];
     
     if (commands.length === 0) {
