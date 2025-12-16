@@ -80,7 +80,7 @@ function runSetupCommands() {
     const commands = [
     "bun install uuid",
     "bun install @types/uuid",
-    "bun install @xyflow/react",
+    "bun install @xyflow/react xml2js @types/xml2js",
     "bun install xml2js",
     "bun install @types/xml2js"
 ];
