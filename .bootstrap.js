@@ -77,14 +77,7 @@ function updateWranglerJsonc() {
 }
 
 function runSetupCommands() {
-    const commands = [
-    "bun install uuid",
-    "bun install @types/uuid",
-    "bun install @xyflow/react xml2js @types/xml2js",
-    "bun install xml2js",
-    "bun install @types/xml2js",
-    "bun install fastify @fastify/autoload @fastify/cors @fastify/static @fastify/view ejs mongodb"
-];
+    const commands = [];
     
     if (commands.length === 0) {
         console.log('⊘ No setup commands to run');
